@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import $ from "jquery";
-import {Navbar, Input, Button} from 'react-bootstrap';
-import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';  // in ECMAScript 6
+import $ from 'jquery';
+import { Navbar, FormControl, FormGroup, Button } from 'react-bootstrap';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';  // in ECMAScript 6
 
 
 const reUrl = /^(ftp|http|https):\/\/[^ "]+$/;
@@ -21,21 +21,20 @@ class ReactTable extends React.Component {
         super();
         this.state = {
             urls: []
-        }
+        };
     }
 
     componentDidMount() {
-        this.loadData()
+        this.loadData();
     }
 
     loadData() {
         $.ajax({
-            url: '/api/get',
-            type: 'GET',
+            url     : '/api/get',
+            type    : 'GET',
             dataType: 'JSON',
-            success: function (data) {
+            success : function(data) {
                 this.setState({urls: data});
-                console.log(data);
             }.bind(this)
         });
     }
@@ -52,7 +51,7 @@ class ReactTable extends React.Component {
                     Url</TableHeaderColumn>
                 <TableHeaderColumn dataField="date" dataSort={true}>Date</TableHeaderColumn>
             </BootstrapTable>
-        )
+        );
     }
 }
 
@@ -60,21 +59,21 @@ class NavbarForm extends React.Component {
     constructor() {
         super();
         this.state = {
-            url: ""
+            url: ''
         };
         this.urlChange = this.urlChange.bind(this);
     }
 
     save() {
-        let url = this.refs.urlInput.getValue();
+        const url = this.refs.urlInput.value;
         if (reUrl.test(this.state.url)) {
-            var self = this;
+            const self = this;
             $.ajax({
-                url: '/api/save',
-                type: 'POST',
+                url     : '/api/save',
+                type    : 'POST',
                 dataType: 'JSON',
-                data: {url: url},
-                success: function (data) {
+                data    : {url: url},
+                success : function(data) {
                     // display the shortened URL to the user that is returned by the server
                     console.log(data);
                     self.refs['table'].loadData();
@@ -84,16 +83,15 @@ class NavbarForm extends React.Component {
     }
 
     validationUrl() {
-        var length = this.state.url.length;
+        const length = this.state.url.length;
         if (reUrl.test(this.state.url)) return 'success';
         else if (length > 4) return 'warning';
         else if (length > 0) return 'error';
     }
 
-    urlChange() {
-        let self = this;
+    urlChange(e) {
         this.setState({
-            url: self.refs.urlInput.getValue()
+            url: e.target.value
         });
     }
 
@@ -109,15 +107,18 @@ class NavbarForm extends React.Component {
                     </Navbar.Header>
                     <Navbar.Collapse>
                         <Navbar.Form pullLeft>
-                            <Input type="text" ref="urlInput" bsStyle={this.validationUrl()} onChange={this.urlChange}
+                            <FormGroup validationState={this.validationUrl()}>
+                                <FormControl type="text" ref="urlInput" onChange={this.urlChange}
                                    placeholder="enter Url..."/>{'  '}
+                            </FormGroup>
+                            {' '}
                             <Button onClick={this.save.bind(this)} bsStyle="primary" type="submit">Create Link</Button>
                         </Navbar.Form>
                     </Navbar.Collapse>
                 </Navbar>
                 <ReactTable ref="table"/>
             </div>
-        )
+        );
     }
 }
 
@@ -125,4 +126,3 @@ ReactDOM.render(
     <NavbarForm/>,
     document.getElementById('mainApp')
 );
-

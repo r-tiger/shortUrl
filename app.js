@@ -1,23 +1,23 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-var shortenUrl = require('./bin/shortenUrl');
+const shortenUrl = require('./bin/shortenUrl');
 
-var routes = require('./routes/index');
+const routes = require('./routes/index');
 
-var app = express();
+const app = express();
 
 // Connect to our mongo database
-var uri = process.env.MONGOLAB_URI || 'mongodb://localhost/shortenUrl';
+const uri = process.env.MONGOLAB_URI || 'mongodb://localhost/shortenUrl';
 mongoose.connect(uri);
 console.log('Connecting to DB : ', uri);
 
-var UrlBase = require('./models/model');
+const UrlBase = require('./models/model');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,37 +39,37 @@ app.use('/', routes);
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
+    app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
-            error: err
+            error  : err
         });
     });
 }
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res, next) {
+app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
-        error: {}
+        error  : {}
     });
 });
 
 //*****************API****************************
-var router = express.Router();
+const router = express.Router();
 /*router.use(function(req, res, next) {
  // do logging
  next();
  });*/
 router.route('/save')
-    .post(function (req, res) {
-        var Url = req.body.url;
-        var sendRes = res;
-        var shortUrl = "";      
-        UrlBase.findOne({url: Url}, function (err, doc) {
+    .post(function(req, res) {
+        const Url = req.body.url;
+        const sendRes = res;
+        let shortUrl = '';
+        UrlBase.findOne({url: Url}, function(err, doc) {
             if (doc) {
                 shortUrl = shortenUrl.encodeUrl(doc.count);
                 res.send({'shortUrl': shortUrl});
@@ -77,21 +77,22 @@ router.route('/save')
             else {
                 UrlBase.findOne({})
                     .sort('-count')  // give me the max
-                    .exec(function (err, obj) {
-                        var maxCount;
+                    .exec(function(err, obj) {
+                        let maxCount;
                         if (obj && obj.count) {
-                            maxCount = obj.count+1;
-                        } else {
+                            maxCount = obj.count + 1;
+                        }
+                        else {
                             maxCount = 1000;
                         }
-                        var newUrl = UrlBase({
-                            url: Url,
-                            date: new Date(),
-                            count: maxCount,
+                        const newUrl = UrlBase({
+                            url     : Url,
+                            date    : new Date(),
+                            count   : maxCount,
                             shortUrl: shortenUrl.encodeUrl(maxCount)
                         });
                         // save the new link
-                        newUrl.save(function (err, res) {
+                        newUrl.save(function(err, res) {
                             if (err) {
                                 console.log(err);
                             }
